@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-ASGI_APPLICATION = 'stock_monitoring.asgi.application'
+ASGI_APPLICATION = 'stockMonitoring.asgi.application'
 
 
 MIDDLEWARE = [
@@ -73,7 +73,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'stockMonitoring.wsgi.application'
+# WSGI_APPLICATION = 'stockMonitoring.wsgi.application'
 
 CHANNEL_LAYERS = {
     "default": {
