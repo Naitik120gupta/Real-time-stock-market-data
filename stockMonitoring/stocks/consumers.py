@@ -4,7 +4,7 @@ import datetime
 import yfinance as yf
 import asyncio
 
-class stockMonitoring(AsyncWebsocketConsumer):
+class StockConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         self.subsrcribed = False
