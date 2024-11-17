@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Stock Monitor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .stock {
+            margin: 10px 0;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Stock Prices</h1>
+    <div id="stocks"></div>
+
+    <script>
+        // WebSocket connection
+        const socket = new WebSocket('ws://127.0.0.1:8000/ws/stocks/');
+
+        // Handle incoming messages
+        socket.onmessage = function(event) {
+            const stockData = JSON.parse(event.data);
+            let html = '';
+            for (const [stock, price] of Object.entries(stockData)) {
+                html += `<div class="stock">${stock}: <span>₹${price.toFixed(2)}</span></div>`;
+            }
+            document.getElementById('stocks').innerHTML = html;
+        };
+
+        socket.onclose = function() {
+            console.log("WebSocket connection closed.");
+        };
+    </script>
+</body>
+</html>
