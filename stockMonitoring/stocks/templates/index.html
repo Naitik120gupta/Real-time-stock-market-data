@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% comment %} <!DOCTYPE html>
 <html>
 <head>
     <title>Real-Time Stock Monitor</title>
@@ -39,4 +39,66 @@
         };
     </script>
 </body>
+</html> {% endcomment %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Stock Subscription</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Subscribe to Real-Time Stock Updates</h1>
+    <button id="subscribeBtn">Subscribe to Stock Updates</button>
+    <button id="unsubscribeBtn">Unsubscribe</button>
+    <div id="stockData"></div>
+
+    <script>
+        const socket = new WebSocket('ws://127.0.0.1:8000/ws/stocks/');
+
+        socket.onopen = function() {
+            console.log("WebSocket connection established.");
+        };
+
+        socket.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+
+            if (message.channel === "stock_updates") {
+                const stockData = message.data;
+                let html = "<h2>Stock Updates</h2>";
+                for (const [stock, price] of Object.entries(stockData)) {
+                    html += `<p>${stock}: $${price.toFixed(2)}</p>`;
+                }
+                document.getElementById("stockData").innerHTML = html;
+            }
+        };
+
+        document.getElementById("subscribeBtn").onclick = function() {
+            socket.send(JSON.stringify({
+                action: "subscribe",
+                channel: "stock_updates"
+            }));
+        };
+
+        document.getElementById("unsubscribeBtn").onclick = function() {
+            socket.send(JSON.stringify({
+                action: "unsubscribe",
+                channel: "stock_updates"
+            }));
+        };
+
+        socket.onclose = function() {
+            console.log("WebSocket connection closed.");
+        };
+    </script>
+</body>
 </html>
+
