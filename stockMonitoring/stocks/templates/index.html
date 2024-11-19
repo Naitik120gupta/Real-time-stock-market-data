@@ -1,49 +1,7 @@
-{% comment %} <!DOCTYPE html>
-<html>
-<head>
-    <title>Real-Time Stock Monitor</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            text-align: center;
-        }
-        .stock {
-            margin: 10px 0;
-            font-size: 20px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Real-Time Stock Prices</h1>
-    <div id="stocks"></div>
-
-    <script>
-        // WebSocket connection
-        const socket = new WebSocket('ws://127.0.0.1:8000/ws/stocks/');
-
-        // Handle incoming messages
-        socket.onmessage = function(event) {
-            const stockData = JSON.parse(event.data);
-            let html = '';
-            for (const [stock, price] of Object.entries(stockData)) {
-                html += `<div class="stock">${stock}: <span>₹${price.toFixed(2)}</span></div>`;
-            }
-            document.getElementById('stocks').innerHTML = html;
-        };
-
-        socket.onclose = function() {
-            console.log("WebSocket connection closed.");
-        };
-    </script>
-</body>
-</html> {% endcomment %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Real-Time Stock Subscription</title>
+    <title>Real-Time Stock Charts</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -53,17 +11,43 @@
         h1 {
             text-align: center;
         }
+        canvas {
+            max-width: 800px;
+            margin: 20px auto;
+        }
     </style>
 </head>
 <body>
-    <h1>Subscribe to Real-Time Stock Updates</h1>
+    <h1>Real-Time Stock Charts</h1>
     <button id="subscribeBtn">Subscribe to Stock Updates</button>
     <button id="unsubscribeBtn">Unsubscribe</button>
-    <div id="stockData"></div>
+    <canvas id="stockChart"></canvas>
 
     <script>
         const socket = new WebSocket('ws://127.0.0.1:8000/ws/stocks/');
+        const ctx = document.getElementById('stockChart').getContext('2d');
 
+        // Initialize Chart.js
+        const stockChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Time labels
+                datasets: [
+                    { label: 'AAPL', data: [], borderColor: 'red', borderWidth: 2 },
+                    { label: 'GOOGL', data: [], borderColor: 'blue', borderWidth: 2 },
+                    { label: 'MSFT', data: [], borderColor: 'green', borderWidth: 2 }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Time' } },
+                    y: { title: { display: true, text: 'Price (USD)' } }
+                }
+            }
+        });
+
+        // Handle WebSocket connection
         socket.onopen = function() {
             console.log("WebSocket connection established.");
         };
@@ -73,14 +57,25 @@
 
             if (message.channel === "stock_updates") {
                 const stockData = message.data;
-                let html = "<h2>Stock Updates</h2>";
-                for (const [stock, price] of Object.entries(stockData)) {
-                    html += `<p>${stock}: $${price.toFixed(2)}</p>`;
+                const time = new Date().toLocaleTimeString();
+
+                // Update the chart with new data
+                stockChart.data.labels.push(time);
+                stockChart.data.datasets[0].data.push(stockData.AAPL);
+                stockChart.data.datasets[1].data.push(stockData.GOOGL);
+                stockChart.data.datasets[2].data.push(stockData.MSFT);
+
+                // Keep only the last 20 data points
+                if (stockChart.data.labels.length > 20) {
+                    stockChart.data.labels.shift();
+                    stockChart.data.datasets.forEach(dataset => dataset.data.shift());
                 }
-                document.getElementById("stockData").innerHTML = html;
+
+                stockChart.update();
             }
         };
 
+        // Subscribe and unsubscribe buttons
         document.getElementById("subscribeBtn").onclick = function() {
             socket.send(JSON.stringify({
                 action: "subscribe",
@@ -101,4 +96,3 @@
     </script>
 </body>
 </html>
-

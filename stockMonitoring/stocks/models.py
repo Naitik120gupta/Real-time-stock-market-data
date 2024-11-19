@@ -1,5 +1,5 @@
 from django.db import models
-class StockData(models.Model):
+class StockPrice(models.Model):
     stock_symbol = models.CharField(max_length=10)
     price = models.FloatField()
     timestamp = models.DateTimeField(auto_now_add=True)
