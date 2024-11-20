@@ -27,7 +27,6 @@
         const socket = new WebSocket('ws://127.0.0.1:8000/ws/stocks/');
         const ctx = document.getElementById('stockChart').getContext('2d');
 
-        // Initialize Chart.js
         const stockChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -47,7 +46,6 @@
             }
         });
 
-        // Handle WebSocket connection
         socket.onopen = function() {
             console.log("WebSocket connection established.");
         };
@@ -59,7 +57,7 @@
                 const stockData = message.data;
                 const time = new Date().toLocaleTimeString();
 
-                // Update the chart with new data
+                
                 stockChart.data.labels.push(time);
                 stockChart.data.datasets[0].data.push(stockData.AAPL);
                 stockChart.data.datasets[1].data.push(stockData.GOOGL);
@@ -75,7 +73,7 @@
             }
         };
 
-        // Subscribe and unsubscribe buttons
+  
         document.getElementById("subscribeBtn").onclick = function() {
             socket.send(JSON.stringify({
                 action: "subscribe",
